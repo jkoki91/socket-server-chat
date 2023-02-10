@@ -49,9 +49,7 @@ const conectarSocket = async () => {
         console.log('Sockets offline');
     })
 
-    socket.on('recibir-mensajes', () => {
-
-    })
+    socket.on('recibir-mensajes', dibujarMensajes )
 
     socket.on('usuarios-activos', dibujarUsuarios ) // (socket) => dibujarUsuarios(socket); //Es equivalente
 
@@ -78,6 +76,50 @@ const dibujarUsuarios = ( usuarios = []) => {
     ulUsuarios.innerHTML = usersHtml;
 
 }
+
+const dibujarMensajes = ( mensajes = []) => {
+
+    let mensajesHTML = '';
+    mensajes.forEach( ({ nombre, mensaje }) => {
+
+        mensajesHTML += `
+            <li>
+                <p>
+                    <span class="text-primary">${ nombre }: </span>
+                    <span>${ mensaje }</span>
+                </p>
+            </li>
+        `;
+    });
+
+    ulMensajes.innerHTML = mensajesHTML;
+
+}
+
+txtMensaje.addEventListener('keyup', ({ keyCode }) => {
+    
+    const mensaje = txtMensaje.value;
+    const uid     = txtUid.value;
+
+    if( keyCode !== 13 ){ return; }
+    if( mensaje.length === 0 ){ return; }
+
+    socket.emit('enviar-mensaje', { mensaje, uid });
+
+    txtMensaje.value = '';
+
+})
+
+btnSalir.addEventListener('click', ()=> {
+
+    localStorage.removeItem('token');
+
+    const auth2 = gapi.auth2.getAuthInstance();
+    auth2.signOut().then( () => {
+        console.log('User signed out.');
+        window.location = 'index.html';
+    });
+});
 
 const main = async () => {
 
